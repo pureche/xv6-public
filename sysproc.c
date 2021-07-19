@@ -16,7 +16,15 @@ sys_fork(void)
 int
 sys_exit(void)
 {
-  exit();
+//LAB1.A//
+
+	int status; //need status to pass to exit//
+	
+	if(argint(0, &status)<0){ //retrieves status from user ver of exit(status) and sets local status to its value//
+		return -1; //invalid address
+	}
+	
+  exit(status); //to comply with modified exit//
   return 0;  // not reached
 }
 

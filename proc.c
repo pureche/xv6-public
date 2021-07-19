@@ -247,6 +247,8 @@ exit(int status) //change call signature//
   end_op();
   curproc->cwd = 0;
 
+	curproc->exitStatus = status; //LAB1.A store exit status in proc
+
   acquire(&ptable.lock);
 
   // Parent might be sleeping in wait().
