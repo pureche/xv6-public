@@ -64,8 +64,8 @@ runcmd(struct cmd *cmd)
   struct pipecmd *pcmd;
   struct redircmd *rcmd;
 
-  if(cmd == 0)
-    exit();
+  if(cmd == 0) //if there are no arguments//
+    exit(0); //exit bc there is no command to execute//
 
   switch(cmd->type){
   default:
@@ -73,8 +73,8 @@ runcmd(struct cmd *cmd)
 
   case EXEC:
     ecmd = (struct execcmd*)cmd;
-    if(ecmd->argv[0] == 0)
-      exit();
+    if(ecmd->argv[0] == 0) //if there is no arg//
+      exit(1); //exit 1 bc failed to exec//
     exec(ecmd->argv[0], ecmd->argv);
     printf(2, "exec %s failed\n", ecmd->argv[0]);
     break;
@@ -84,7 +84,7 @@ runcmd(struct cmd *cmd)
     close(rcmd->fd);
     if(open(rcmd->file, rcmd->mode) < 0){
       printf(2, "open %s failed\n", rcmd->file);
-      exit();
+      exit(1); //only gets here after fail^//
     }
     runcmd(rcmd->cmd);
     break;
@@ -126,8 +126,8 @@ runcmd(struct cmd *cmd)
     if(fork1() == 0)
       runcmd(bcmd->cmd);
     break;
-  }
-  exit();
+  } //end switch//
+  exit(0); //LAB1A
 }
 
 int
@@ -168,14 +168,14 @@ main(void)
       runcmd(parsecmd(buf));
     wait();
   }
-  exit();
+  exit(0); //LAB1A
 }
 
 void
 panic(char *s)
 {
   printf(2, "%s\n", s);
-  exit();
+  exit(1); //LAB1A 1 bc panicking//
 }
 
 int
