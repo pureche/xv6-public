@@ -21,6 +21,16 @@ exec(char *path, char **argv)
 
   begin_op();
 
+	//debugging prints-------------------------------------
+	cprintf("----- DEBUGGING OUTPUT -------\n");
+	cprintf("path: %s \n" , path);
+	for(argc = 0; argv[argc]; argc++){
+		cprintf("argv[%d]: %s\n", argc, argv[argc]);
+	}
+	
+	cprintf("-------- END DEBUGGING OUTPUT ------ \n");
+	//delete when finished
+
   if((ip = namei(path)) == 0){
     end_op();
     cprintf("exec: fail\n");
