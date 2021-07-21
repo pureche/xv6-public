@@ -267,10 +267,54 @@ exit(void)
   panic("zombie exit");
 }
 
+//***************************************************************************************************************************
+void
+EXIT(int status)
+{
+  struct proc *curproc = myproc();
+  struct proc *p;
+  int fd;
+
+  if(curproc == initproc)
+    panic("init exiting");
+
+
+  for(fd = 0; fd < NOFILE; fd++){
+    if(curproc->ofile[fd]){
+      fileclose(curproc->ofile[fd]);
+      curproc->ofile[fd] = 0;
+    }
+  }
+
+  begin_op();
+  iput(curproc->cwd);
+  end_op();
+  curproc->cwd = 0;
+
+  acquire(&ptable.lock);
+
+
+  wakeup1(curproc->parent);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->parent == curproc){
+      p->parent = initproc;
+      if(p->state == ZOMBIE)
+        wakeup1(initproc);
+    }
+  }
+
+  curproc->exit_status = status;
+
+  curproc->state = ZOMBIE;
+  sched();
+  panic("zombie exit");
+}
+//**************************************************************************************************************************************
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
-wait(void)
+wait(int *status)
 {
   struct proc *p;
   int havekids, pid;
@@ -295,6 +339,11 @@ wait(void)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+//*********************************************************************************************************************************8
+        if(status){ 
+          *status = p->exit_status;
+        }
+//*********************************************************************************************************************************
         release(&ptable.lock);
         return pid;
       }
@@ -310,6 +359,48 @@ wait(void)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
 }
+//**********************************************************************************************************************************
+int
+waitpid(int pid, int *status, int options)
+{
+  struct proc *p;
+  int havekids, pid2;
+  struct proc *curproc = myproc();
+
+  acquire(&ptable.lock);
+  for(;;){
+        havekids = 0;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          if(p->pid != pid)
+            continue;
+        havekids = 1;
+        if(p->state == ZOMBIE){
+          pid2 = p->pid;
+          kfree(p->kstack);
+          p->kstack = 0;
+          freevm(p->pgdir);
+          p->pid = 0;
+          p->parent = 0;
+          p->name[0] = 0;
+          p->killed = 0;
+          p->state = UNUSED;
+
+          if(status){
+            *status = p->exit_status;
+          }
+
+          release(&ptable.lock);
+          return pid2;
+      }
+    }
+    if(!havekids || curproc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+    sleep(curproc, &ptable.lock);
+    }
+}
+//*********************************************************************************************************************************************
 
 //PAGEBREAK: 42
 // Per-CPU process scheduler.

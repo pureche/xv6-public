@@ -1,6 +1,9 @@
 // Test that fork fails gracefully.
 // Tiny executable so that the limit can be filling the proc table.
 
+//*******************************************************************************************
+//Change in the file: wait() -> wait(0)
+//*****************************************************************************************
 #include "types.h"
 #include "stat.h"
 #include "user.h"
@@ -34,13 +37,13 @@ forktest(void)
   }
 
   for(; n > 0; n--){
-    if(wait() < 0){
+    if(wait(0) < 0){
       printf(1, "wait stopped early\n");
       exit();
     }
   }
 
-  if(wait() != -1){
+  if(wait(0) != -1){
     printf(1, "wait got too many\n");
     exit();
   }
