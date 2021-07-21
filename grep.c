@@ -43,24 +43,24 @@ main(int argc, char *argv[])
 
   if(argc <= 1){
     printf(2, "usage: grep pattern [file ...]\n");
-    exit();
+    exit(1); //LAB1A error, not enough args//
   }
   pattern = argv[1];
 
   if(argc <= 2){
     grep(pattern, 0);
-    exit();
+    exit(1); //LAB1A if argc <=2, cannot 
   }
 
   for(i = 2; i < argc; i++){
     if((fd = open(argv[i], 0)) < 0){
       printf(1, "grep: cannot open %s\n", argv[i]);
-      exit();
+      exit(1); //LAB1A error couldnt open//
     }
     grep(pattern, fd);
     close(fd);
   }
-  exit();
+  exit(0); //LAB1A called grep with valid arg, can exit successfully//
 }
 
 // Regexp matcher from Kernighan & Pike,

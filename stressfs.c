@@ -17,6 +17,7 @@ int
 main(int argc, char *argv[])
 {
   int fd, i;
+	int status; //lab1b//
   char path[] = "stressfs0";
   char data[512];
 
@@ -43,7 +44,7 @@ main(int argc, char *argv[])
     read(fd, data, sizeof(data));
   close(fd);
 
-  wait();
+  wait(&status); //lab1b//
 
-  exit();
+  exit(0); //LAB 1A//
 }
